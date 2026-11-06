@@ -48,13 +48,6 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 ```
 
-## Screenshots
-
-![Homepage](screenshots/homepage.png)
-![Cart](screenshots/cart.png)
-![Checkout](screenshots/checkout.png)
-![Orders](screenshots/orders.png)
-
 ## Author
 
 Syed Nazeer
