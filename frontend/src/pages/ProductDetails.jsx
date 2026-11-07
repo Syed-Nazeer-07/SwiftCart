@@ -30,9 +30,12 @@ const ProductDetails = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
-    addToCart(product._id, quantity);
-    import('react-hot-toast').then(({ default: toast }) => toast.success('Added to cart'));
+  const handleAddToCart = async () => {
+    const ok = await addToCart(product._id, quantity);
+    if (ok) {
+      const { default: toast } = await import('react-hot-toast');
+      toast.success('Added to cart');
+    }
   };
 
   if (loading) return (
@@ -53,8 +56,7 @@ const ProductDetails = () => {
     </div>
   );
 
-  const rating = product.rating || 4.5;
-  const reviewCount = Math.floor(Math.random() * 500) + 50;
+  const rating = Number(product.rating) > 0 ? Number(product.rating).toFixed(1) : null;
   // Mock thumbnails
   const thumbnails = [product.image, product.image, product.image, product.image];
 
@@ -187,7 +189,7 @@ const ProductDetails = () => {
                         />
                         <button 
                           aria-label="Increase quantity"
-                          onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                          onClick={() => setQuantity(q => Math.min(product.stock, 20, q + 1))}
                           className="px-5 h-full rounded-r-full text-slate-500 hover:bg-slate-50 hover:text-dark font-medium text-lg transition-colors"
                         >+</button>
                       </div>

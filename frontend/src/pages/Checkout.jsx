@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 
 const Checkout = () => {
-  const { cart, fetchCart } = useContext(CartContext);
+  const { cart, cartLoading, fetchCart } = useContext(CartContext);
   const navigate = useNavigate();
   
   const [shippingAddress, setShippingAddress] = useState({
@@ -18,6 +18,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [checkoutError, setCheckoutError] = useState('');
 
   const cartItems = cart?.products || [];
   const itemsPrice = cartItems.reduce((acc, item) => acc + (item.productId?.price * item.quantity), 0);
@@ -30,43 +31,40 @@ const Checkout = () => {
 
   const placeOrder = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setCheckoutError('');
     setLoading(true);
     try {
-      const orderData = {
-        products: cartItems.map(item => ({
-          productId: item.productId._id,
-          quantity: item.quantity,
-          price: item.productId.price
-        })),
-        shippingAddress,
-        totalPrice
-      };
-      
-      const { data } = await api.post('/orders', orderData);
+      // The server loads the authenticated user's cart, calculates its own
+      // prices and taxes, reserves stock and clears the cart in one transaction.
+      const { data } = await api.post('/orders', { shippingAddress });
       setPlacedOrder(data);
       setOrderSuccess(true);
-      
-      // clear cart in backend
-      try {
-        await api.delete('/cart/clear');
-        await fetchCart();
-      } catch (e) {
-        console.error("Failed to clear cart", e);
-      }
-      setTimeout(() => {
-        navigate('/orders');
-      }, 2500);
+      // Checkout already succeeded; a cart refresh failure must not re-submit.
+      fetchCart().catch(() => {});
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert('Failed to place order');
+      setCheckoutError(error.response?.data?.message || 'Checkout could not be completed. Please retry.');
+      fetchCart().catch(() => {});
+    } finally {
       setLoading(false);
     }
   };
 
-  if (cartItems.length === 0 && !orderSuccess) {
-    navigate('/cart');
-    return null;
+  useEffect(() => {
+    if (cartLoading || orderSuccess || cartItems.length > 0) return;
+    navigate('/cart', { replace: true });
+  }, [cartLoading, cartItems.length, orderSuccess, navigate]);
+
+  useEffect(() => {
+    if (!orderSuccess) return;
+    const timer = setTimeout(() => navigate('/orders'), 2500);
+    return () => clearTimeout(timer);
+  }, [orderSuccess, navigate]);
+
+  if (cartLoading) {
+    return <div className="min-h-[50vh] flex items-center justify-center text-slate-500">Loading your cart…</div>;
   }
+  if (cartItems.length === 0 && !orderSuccess) return null;
 
   // Delivery estimate calculation for success screen
   const getEstimatedDelivery = () => {
@@ -119,7 +117,7 @@ const Checkout = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Amount</p>
-                  <p className="text-dark font-bold">${totalPrice.toFixed(2)}</p>
+                  <p className="text-dark font-bold">${placedOrder?.totalPrice?.toFixed(2) ?? totalPrice.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Estimated Delivery</p>
@@ -197,10 +195,20 @@ const Checkout = () => {
                 </div>
               </div>
               
-              <button 
-                type="submit" 
+              {checkoutError && (
+                <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {checkoutError}
+                </div>
+              )}
+              <p className="mt-5 text-xs leading-relaxed text-slate-500">
+                Demo checkout: this reserves inventory and creates an order. No payment is collected.
+                Final prices are verified by the server.
+              </p>
+
+              <button
+                type="submit"
                 form="checkout-form"
-                disabled={loading}
+                disabled={loading || cartItems.length === 0}
                 aria-label="Confirm and Place Order"
                 className="w-full mt-8 bg-dark text-white py-4 rounded-full font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl disabled:bg-slate-300 disabled:cursor-not-allowed text-base sm:text-lg flex justify-center items-center"
               >
