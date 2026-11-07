@@ -80,7 +80,12 @@ function validateStatusTransition(current, next) {
   if (!ORDER_STATUSES.includes(next)) throw new CommerceError('Unsupported order status.');
   if (current === next) return;
   if (['Delivered', 'Cancelled'].includes(current)) throw new CommerceError('Completed orders cannot change status.', 409);
-  if (next === 'Cancelled') return;
+  if (next === 'Cancelled') {
+    if (!['Processing', 'Packed'].includes(current)) {
+      throw new CommerceError('Only unshipped orders may be cancelled.', 409);
+    }
+    return;
+  }
   const before = ORDER_STATUSES.indexOf(current);
   const after = ORDER_STATUSES.indexOf(next);
   if (before < 0 || after < before || after > before + 1) {
