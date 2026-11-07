@@ -136,15 +136,12 @@ const ProductDetails = () => {
               animate={{ opacity: 1, x: 0 }}
               className="lg:w-1/2 p-5 sm:p-8 lg:p-12 flex flex-col"
             >
-              <div className="mb-3 flex flex-wrap items-center gap-3">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-dark text-dark' : 'text-slate-300'}`} />
-                  ))}
-                  <span className="font-semibold text-dark ml-2 mr-1">{rating}</span>
-                  <span className="text-slate-500 underline cursor-pointer hover:text-dark">({reviewCount} reviews)</span>
+              {rating && (
+                <div className="mb-3 flex items-center gap-2 text-sm text-dark">
+                  <Star className="h-4 w-4 fill-dark text-dark" />
+                  <span className="font-semibold">{rating} / 5</span>
                 </div>
-              </div>
+              )}
               
               <h1 className="text-2xl sm:text-4xl font-bold text-dark mb-4 leading-tight tracking-tight">
                 {product.title}
@@ -154,9 +151,7 @@ const ProductDetails = () => {
                 <p className="text-3xl sm:text-4xl text-dark font-bold">${product.price.toFixed(2)}</p>
                 {(product.originalPrice && product.originalPrice > product.price) ? (
                   <p className="text-lg text-slate-400 line-through mb-1">${product.originalPrice.toFixed(2)}</p>
-                ) : (
-                  <p className="text-lg text-slate-400 line-through mb-1">${(product.price * 1.25).toFixed(2)}</p>
-                )}
+                ) : null}
               </div>
 
               <div className="text-sm text-slate-500 mb-8 space-y-1">
@@ -230,7 +225,7 @@ const ProductDetails = () => {
                     <ShieldCheck className="w-5 h-5 mr-3 text-dark flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-dark">Secure Payment</p>
-                      <p className="text-xs">256-bit SSL encryption</p>
+                      <p className="text-xs">No payment collected</p>
                     </div>
                   </div>
                   <div className="flex items-center">
