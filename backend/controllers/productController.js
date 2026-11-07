@@ -1,14 +1,18 @@
 const Product = require('../models/Product');
 
+const safeRegex = (text) => String(text).trim().slice(0, 80).replace(/[.*+?^\${}()|[\]\\]/g, '\\const Product = require('../models/Product');');
+
+
 const getProducts = async (req, res) => {
   try {
     const query = {};
-    if (req.query.keyword) {
+    if (typeof req.query.keyword === 'string' && req.query.keyword.trim()) {
+      const keyword = safeRegex(req.query.keyword);
       query.$or = [
-        { title: { $regex: req.query.keyword, $options: 'i' } },
-        { description: { $regex: req.query.keyword, $options: 'i' } },
-        { brand: { $regex: req.query.keyword, $options: 'i' } },
-        { category: { $regex: req.query.keyword, $options: 'i' } }
+        { title: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+        { brand: { $regex: keyword, $options: 'i' } },
+        { category: { $regex: keyword, $options: 'i' } }
       ];
     }
     if (req.query.category) {
@@ -24,7 +28,11 @@ const getProducts = async (req, res) => {
     const products = await Product.find(query);
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product data.' });
+    }
+    console.error('Product operation failed:', error);
+    res.status(500).json({ message: 'Product request failed.' });
   }
 };
 
@@ -37,7 +45,11 @@ const getProductById = async (req, res) => {
       res.status(404).json({ message: 'Product not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product data.' });
+    }
+    console.error('Product operation failed:', error);
+    res.status(500).json({ message: 'Product request failed.' });
   }
 };
 
@@ -50,7 +62,11 @@ const createProduct = async (req, res) => {
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product data.' });
+    }
+    console.error('Product operation failed:', error);
+    res.status(500).json({ message: 'Product request failed.' });
   }
 };
 
@@ -60,11 +76,11 @@ const updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     
     if (product) {
-      product.title = title || product.title;
-      product.description = description || product.description;
-      product.price = price || product.price;
-      product.image = image || product.image;
-      product.category = category || product.category;
+      if (title !== undefined) product.title = title;
+      if (description !== undefined) product.description = description;
+      if (price !== undefined) product.price = price;
+      if (image !== undefined) product.image = image;
+      if (category !== undefined) product.category = category;
       product.stock = stock !== undefined ? stock : product.stock;
       product.rating = rating !== undefined ? rating : product.rating;
       
@@ -74,7 +90,11 @@ const updateProduct = async (req, res) => {
       res.status(404).json({ message: 'Product not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product data.' });
+    }
+    console.error('Product operation failed:', error);
+    res.status(500).json({ message: 'Product request failed.' });
   }
 };
 
@@ -88,7 +108,11 @@ const deleteProduct = async (req, res) => {
       res.status(404).json({ message: 'Product not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product data.' });
+    }
+    console.error('Product operation failed:', error);
+    res.status(500).json({ message: 'Product request failed.' });
   }
 };
 

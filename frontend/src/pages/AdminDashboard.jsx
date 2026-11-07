@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 
+const ORDER_FLOW = ['Processing', 'Packed', 'Shipped', 'Out For Delivery', 'Delivered'];
+const allowedStatuses = (current) => {
+  const index = ORDER_FLOW.indexOf(current);
+  if (index === -1 || current === 'Delivered') return [current];
+  return [
+    current,
+    ...(index + 1 < ORDER_FLOW.length ? [ORDER_FLOW[index + 1]] : []),
+    ...(['Processing', 'Packed'].includes(current) ? ['Cancelled'] : []),
+  ];
+};
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
@@ -51,8 +62,13 @@ const AdminDashboard = () => {
   };
 
   const updateOrderStatus = async (id, status) => {
-    await api.put(`/orders/${id}/status`, { status });
-    fetchData();
+    try {
+      await api.put(`/orders/${id}/status`, { status });
+      await fetchData();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not change order status.');
+      await fetchData();
+    }
   };
 
   return (
@@ -135,15 +151,13 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4">
                       <select 
                         value={o.status}
+                        disabled={['Delivered', 'Cancelled'].includes(o.status)}
                         onChange={(e) => updateOrderStatus(o._id, e.target.value)}
                         className="border border-slate-200 p-2 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-dark/20"
                       >
-                        <option value="Processing">Processing</option>
-                        <option value="Packed">Packed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Out For Delivery">Out For Delivery</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
+                        {allowedStatuses(o.status).map((status) => (
+                          <option value={status} key={status}>{status}</option>
+                        ))}
                       </select>
                     </td>
                   </tr>
