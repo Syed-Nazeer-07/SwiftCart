@@ -1,6 +1,6 @@
 const Product = require('../models/Product');
 
-const safeRegex = (text) => String(text).trim().slice(0, 80).replace(/[.*+?^\${}()|[\]\\]/g, '\\const Product = require('../models/Product');');
+const safeRegex = (text) => [...String(text).trim().slice(0, 80)].map((ch) => '.*+?^$()[]{}|'.includes(ch) || ch.charCodeAt(0) === 92 ? String.fromCharCode(92) + ch : ch).join('');
 
 
 const getProducts = async (req, res) => {
