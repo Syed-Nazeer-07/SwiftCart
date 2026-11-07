@@ -60,7 +60,11 @@ function priceOrder(lines, catalog) {
       throw new CommerceError('Insufficient stock for ' + String(product.title || 'an item').slice(0, 80) + '.', 409);
     }
     const cents = dollarsToCents(product.price);
-    return { productId, quantity, price: cents / 100, lineCents: cents * quantity };
+    return { productId, quantity, price: cents / 100, lineCents: cents * quantity,
+      title: String(product.title || 'Product').slice(0, 200),
+      image: String(product.image || '').slice(0, 1200),
+      brand: String(product.brand || '').slice(0, 100),
+    };
   });
   const subtotalCents = priced.reduce((sum, item) => sum + item.lineCents, 0);
   const taxCents = Math.round(subtotalCents * TAX_RATE_PERCENT / 100);
@@ -69,7 +73,8 @@ function priceOrder(lines, catalog) {
     throw new CommerceError('The cart total is invalid.', 409);
   }
   return {
-    products: priced.map(({ productId, quantity, price }) => ({ productId, quantity, price })),
+    products: priced.map(({ productId, quantity, price, title, image, brand }) =>
+      ({ productId, quantity, price, title, image, brand })),
     subtotal: subtotalCents / 100,
     tax: taxCents / 100,
     totalPrice: totalCents / 100,

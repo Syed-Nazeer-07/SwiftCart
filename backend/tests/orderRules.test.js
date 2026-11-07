@@ -32,7 +32,8 @@ test('server uses catalog prices and calculates tax with integer cents', () => {
   assert.equal(data.subtotal, 48.48);
   assert.equal(data.tax, 4.85);
   assert.equal(data.totalPrice, 53.33);
-  assert.deepEqual(data.products[0], { productId: idA, quantity: 2, price: 19.99 });
+  assert.deepEqual(data.products[0], { productId: idA, quantity: 2, price: 19.99,
+    title: 'Item A', image: '', brand: '' });
 });
 
 test('unavailable inventory and invalid catalog prices block checkout', () => {

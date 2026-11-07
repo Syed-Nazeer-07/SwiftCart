@@ -188,16 +188,19 @@ const OrderHistory = () => {
 
                 <div className="space-y-6 divide-y divide-slate-50">
                   {order.products.map(item => (
-                    item.productId && (
-                      <div key={item.productId._id} className="pt-6 first:pt-0 flex flex-col sm:flex-row items-start gap-6">
+                      <div key={item._id || item.productId?._id} className="pt-6 first:pt-0 flex flex-col sm:flex-row items-start gap-6">
                         <div className="w-24 h-24 sm:w-32 sm:h-32 bg-slate-50 rounded-xl flex-shrink-0 flex items-center justify-center p-3 border border-slate-100">
-                          <img src={item.productId.image} alt={item.productId.title} className="w-full h-full object-contain" />
+                          {(item.image || item.productId?.image) ? <img src={item.image || item.productId?.image} alt={item.title || item.productId?.title || 'Product'} className="w-full h-full object-contain" /> : <Package className="w-8 h-8 text-slate-300" />}
                         </div>
                         <div className="flex-grow">
-                          <Link to={`/product/${item.productId._id}`} className="text-base sm:text-lg font-bold text-dark hover:underline line-clamp-2 mb-1">
-                            {item.productId.title}
-                          </Link>
-                          {item.productId.brand && <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-3">{item.productId.brand}</p>}
+                          {item.productId?._id ? (
+                            <Link to={`/product/${item.productId._id}`} className="text-base sm:text-lg font-bold text-dark hover:underline line-clamp-2 mb-1">
+                              {item.title || item.productId.title}
+                            </Link>
+                          ) : (
+                            <p className="text-base sm:text-lg font-bold text-dark mb-1">{item.title || 'Removed product'}</p>
+                          )}
+                          {(item.brand || item.productId?.brand) && <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-3">{item.brand || item.productId?.brand}</p>}
                           <div className="flex items-center text-sm text-slate-600 mb-1">
                             <span className="font-medium mr-2">Qty:</span> {item.quantity}
                           </div>
@@ -206,12 +209,11 @@ const OrderHistory = () => {
                           </div>
                         </div>
                         <div className="hidden sm:block text-right">
-                          <Link to={`/product/${item.productId._id}`} className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-dark px-5 py-2.5 rounded-full text-sm font-semibold transition-colors block text-center mb-2">
-                            Buy it again
-                          </Link>
+                          {item.productId?._id && <Link to={`/product/${item.productId._id}`} className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-dark px-5 py-2.5 rounded-full text-sm font-semibold transition-colors block text-center mb-2">
+                            View product
+                          </Link>}
                         </div>
                       </div>
-                    )
                   ))}
                 </div>
               </div>
@@ -296,11 +298,11 @@ const OrderHistory = () => {
                     <Package className="w-4 h-4 mr-2" /> Items Ordered
                   </h3>
                   <div className="space-y-4">
-                    {selectedOrder.products.map(item => item.productId && (
-                      <div key={item.productId._id} className="flex items-center gap-4 bg-white border border-slate-100 p-3 rounded-xl">
-                        <img src={item.productId.image} alt={item.productId.title} className="w-16 h-16 object-contain bg-slate-50 rounded-lg p-1" />
+                    {selectedOrder.products.map(item => (
+                      <div key={item._id || item.productId?._id} className="flex items-center gap-4 bg-white border border-slate-100 p-3 rounded-xl">
+                        {(item.image || item.productId?.image) ? <img src={item.image || item.productId?.image} alt={item.title || item.productId?.title || 'Product'} className="w-16 h-16 object-contain bg-slate-50 rounded-lg p-1" /> : <Package className="w-8 h-8 text-slate-300" />}
                         <div className="flex-grow">
-                          <p className="font-bold text-dark text-sm line-clamp-1">{item.productId.title}</p>
+                          <p className="font-bold text-dark text-sm line-clamp-1">{item.title || item.productId?.title || 'Removed product'}</p>
                           <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
                         </div>
                         <div className="font-bold text-dark text-sm">
@@ -314,12 +316,12 @@ const OrderHistory = () => {
                 {/* Summary */}
                 <div>
                   <h3 className="font-bold text-dark mb-4 text-sm uppercase tracking-wider flex items-center">
-                    <CreditCard className="w-4 h-4 mr-2" /> Payment Summary
+                    <CreditCard className="w-4 h-4 mr-2" /> Order Summary
                   </h3>
                   <div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${(selectedOrder.totalPrice / 1.1).toFixed(2)}</span>
+                      <span>${(selectedOrder.subtotal ?? selectedOrder.totalPrice / 1.1).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
@@ -327,7 +329,7 @@ const OrderHistory = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${(selectedOrder.totalPrice - (selectedOrder.totalPrice / 1.1)).toFixed(2)}</span>
+                      <span>${(selectedOrder.tax ?? selectedOrder.totalPrice - selectedOrder.totalPrice / 1.1).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-dark pt-2 border-t border-slate-200 mt-2 text-base">
                       <span>Total</span>
