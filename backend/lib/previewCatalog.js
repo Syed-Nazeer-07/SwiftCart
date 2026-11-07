@@ -11,7 +11,7 @@ const examples = [
   { title: 'Wireless Keyboard', category: 'Electronics', brand: 'Keychron', price: 199, originalPrice: null, image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&q=80&w=800', description: 'Example accessory listing for the SwiftCart portfolio preview.', featured: true, bestseller: false },
 ].map((item, index) => ({
   ...item,
-  _id: 'd000000000000000000000' + String(index + 1),
+  _id: String(index + 1).padStart(24, 'd'),
   stock: 0,
   rating: 0,
   isPreview: true,
