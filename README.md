@@ -128,23 +128,23 @@ Two Vercel projects are connected to this repository's **main** branch:
 
 | Project | Root directory | Reserved domain |
 |---|---|---|
-| SwiftCart frontend | \`frontend\` (Vite) | \`swiftcart-steel.vercel.app\` |
-| SwiftCart API | \`backend\` (Express) | \`swiftcart-api-ten.vercel.app\` |
+| SwiftCart frontend | `frontend` (Vite) | `swiftcart-steel.vercel.app` |
+| SwiftCart API | `backend` (Express) | `swiftcart-api-ten.vercel.app` |
 
 These domains are reserved in Vercel. **They must not be treated as live until each project's Production deployment shows READY and the endpoints have been tested.**
 
 Environment settings configured in Vercel:
-- Frontend \`VITE_API_URL=https://swiftcart-api-ten.vercel.app/api\`
-- Backend \`FRONTEND_ORIGINS=https://swiftcart-steel.vercel.app\`
-- Backend \`JWT_SECRET\` is securely stored as a sensitive project variable.
+- Frontend `VITE_API_URL=https://swiftcart-api-ten.vercel.app/api`
+- Backend `FRONTEND_ORIGINS=https://swiftcart-steel.vercel.app`
+- Backend `JWT_SECRET` is securely stored as a sensitive project variable.
 
-**Owner action required for real shopping:** connect MongoDB Atlas (or another MongoDB replica set) and add the backend environment variable \`MONGO_URI\` as a **Sensitive** variable in Vercel, for both Production and Preview. Redeploy the backend afterwards. Never place the MongoDB URI in \`VITE_*\` frontend variables, Git source, or chat.
+**Owner action required for real shopping:** connect MongoDB Atlas (or another MongoDB replica set) and add the backend environment variable `MONGO_URI` as a **Sensitive** variable in Vercel, for both Production and Preview. Redeploy the backend afterwards. Never place the MongoDB URI in `VITE_*` frontend variables, Git source, or chat.
 
-Until MongoDB is connected, the backend serves a **read-only sample catalog**, exposes \`/api/health\` with \`status: setup_required\`, and returns HTTP 503 for account, cart, and order operations. Example products cannot be ordered.
+Until MongoDB is connected, the backend serves a **read-only sample catalog**, exposes `/api/health` with `status: setup_required`, and returns HTTP 503 for account, cart, and order operations. Example products cannot be ordered.
 
 Vercel may reject deploy attempts when the Hobby plan's daily deployment quota is exhausted. This does not mean the project's code is deployed; redeploy both projects once the quota resets.
 
-The seed script \`npm run seed\` **deletes all existing products before seeding**. Never use it against a populated production database without an explicit backup and authorization.
+The seed script `npm run seed` **deletes all existing products before seeding**. Never use it against a populated production database without an explicit backup and authorization.
 
 ## Order handling
 
